@@ -2,7 +2,7 @@
 import serviceWorkerCheck from "./modules/serviceWorkerCheck.js";
 
 export default function appStart() {
-    serviceWorkerCheck('serviceworker.js')
+    serviceWorkerCheck('serviceWorker.js')
         .then(v => {
             console.log('서비스 워커 등록 성공');
             console.log(v);
