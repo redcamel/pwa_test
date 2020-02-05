@@ -4,7 +4,7 @@
   "description": "manifest Test description",
   "start_url": "./index.html?utm_source=pwa",
   "scope": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "icons": [
     {
       "src": "./img/app-icon-192.png",
