@@ -1,0 +1,22 @@
+{
+  "short_name": "manifest",
+  "name": "manifest Test",
+  "description": "manifest Test description",
+  "start_url": "./index.html?utm_source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "./img/app-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "./img/app-icon-512.jpg",
+      "type": "image/jpg",
+      "sizes": "512x512"
+    }
+  ],
+  "theme_color": "#242424",
+  "background_color": "#242424"
+}
