@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="manifest" href="./manifest.json">
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-messaging.js"></script>
+</head>
+<body>
+<script>
+    function serviceWorkerCheck(scriptURL) {
+        return new Promise((resolve, reject) => {
+            if (navigator.serviceWorker) {
+                if (scriptURL) {
+                    navigator.serviceWorker.register(scriptURL)
+                        .then(v => {
+                            console.log('서비스워커등록성공');
+                            resolve(v);
+                        })
+                        .catch(v => {
+                            // console.log('서비스워커등록실패');
+                            reject(v)
+                        })
+                } else {
+                    // console.log('scriptURL 없음');
+                    reject(new Error('need scriptURL'))
+                }
+
+            } else {
+                // console.log('서비스워커없음');
+                reject(new Error('Not support ServiceWorker'))
+            }
+        })
+
+    };
+    serviceWorkerCheck('messaging-sw.js').then(seviceWorker => {
+        console.log(seviceWorker)
+
+        var urlBase64ToUint8Array = function (base64String) {
+            var padding = "=".repeat((4 - base64String.length % 4) % 4);
+            var base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
+            var rawData = window.atob(base64);
+            var outputArray = new Uint8Array(rawData.length);
+            for (var i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        };
+        const applicationServerPublicKey = 'BDoKISdqRrgtDnRjyp9k93aBDcppT_XTURE_uminsS9k7t1sWIinT-g4iD2msChx37zod_kQ1C7A1i2zkkpkyQk';
+        const applicationServerKey = urlBase64ToUint8Array(applicationServerPublicKey);
+
+
+        let testButton;
+        let setTestButtonState
+        let isSubscribed;
+        setTestButtonState = function(v){
+            isSubscribed = v
+            testButton.innerHTML = v ? '구독 취소 요청' : '구독 요청'
+        }
+        testButton = document.createElement('button')
+        document.body.appendChild(testButton)
+        testButton.addEventListener('click', function (e) {
+            if(isSubscribed){
+                seviceWorker.pushManager.getSubscription()
+                    .then(function(subscription) {
+                        if (subscription) {
+                            return subscription.unsubscribe();
+                        }
+                    })
+                    .catch(function(error) {
+                        console.log('Error unsubscribing', error);
+                    })
+                    .then(function() {
+                        console.log('User is unsubscribed.');
+                        setTestButtonState(false)
+
+                    });
+            }else{
+                seviceWorker.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: applicationServerKey
+                }).then(subscription => {
+                    console.log('구독되었음')
+                    console.log('subscription',JSON.stringify(subscription))
+                    setTestButtonState(true)
+                }).catch(error => {
+                    console.log('구독실패', error)
+                })
+            }
+
+        })
+
+
+        seviceWorker.pushManager.getSubscription()
+            .then(function (subscription) {
+                // 현재 구독상태
+                isSubscribed = !(subscription === null);
+                if (isSubscribed) {
+                    console.log('User IS subscribed.');
+                    console.log('subscription',JSON.stringify(subscription))
+                    setTestButtonState(true)
+
+                } else {
+                    console.log('User is NOT subscribed.');
+                    setTestButtonState(false)
+                    testButton.innerHTML = '구독 요청'
+                }
+
+
+            });
+    })
+
+
+</script>
+<!--https://web-push-codelab.glitch.me/-->
+</body>
+</html>
