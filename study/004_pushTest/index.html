@@ -9,6 +9,11 @@
     <script src="https://www.gstatic.com/firebasejs/7.8.2/firebase-messaging.js"></script>
 </head>
 <body>
+<div>
+    <h1>current subscription</h1>
+    <div id="subscription" style="font-size:11px"></div>
+</div>
+
 <script>
     function serviceWorkerCheck(scriptURL) {
         return new Promise((resolve, reject) => {
@@ -55,36 +60,38 @@
         let testButton;
         let setTestButtonState
         let isSubscribed;
-        setTestButtonState = function(v){
+        setTestButtonState = function (v, subscription) {
             isSubscribed = v
             testButton.innerHTML = v ? '구독 취소 요청' : '구독 요청'
+            document.getElementById('subscription').innerHTML = JSON.stringify(subscription)
         }
         testButton = document.createElement('button')
+        testButton.style.marginTop = '10px'
         document.body.appendChild(testButton)
         testButton.addEventListener('click', function (e) {
-            if(isSubscribed){
+            if (isSubscribed) {
                 seviceWorker.pushManager.getSubscription()
-                    .then(function(subscription) {
+                    .then(function (subscription) {
                         if (subscription) {
                             return subscription.unsubscribe();
                         }
                     })
-                    .catch(function(error) {
+                    .catch(function (error) {
                         console.log('Error unsubscribing', error);
                     })
-                    .then(function() {
+                    .then(function () {
                         console.log('User is unsubscribed.');
                         setTestButtonState(false)
 
                     });
-            }else{
+            } else {
                 seviceWorker.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: applicationServerKey
                 }).then(subscription => {
                     console.log('구독되었음')
-                    console.log('subscription',JSON.stringify(subscription))
-                    setTestButtonState(true)
+                    console.log('subscription', JSON.stringify(subscription))
+                    setTestButtonState(true, subscription)
                 }).catch(error => {
                     console.log('구독실패', error)
                 })
@@ -99,8 +106,8 @@
                 isSubscribed = !(subscription === null);
                 if (isSubscribed) {
                     console.log('User IS subscribed.');
-                    console.log('subscription',JSON.stringify(subscription))
-                    setTestButtonState(true)
+                    console.log('subscription', JSON.stringify(subscription))
+                    setTestButtonState(true, subscription)
 
                 } else {
                     console.log('User is NOT subscribed.');
